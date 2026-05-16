@@ -1,25 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/OKPD classifier V2.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="Initial commit">
+      <change afterPath="$PROJECT_DIR$/src/analysis/eda_report.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/common/pipeline_types.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/confidence/engine_v2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/decision/engine_v2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/text_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/hierarchy/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v1/encoder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v1/faiss_index.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v1/service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v2/class_index.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v2/hierarchical_retriever.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/v2/leaf_index.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/taxonomy/loader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/taxonomy/node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "SergAnt-13"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/SergAnt-13/OKPD_2_classifier_V2.git",
+    "accountId": "98e034b3-5b28-4450-af3c-35e6d5777312"
+  }
+}]]></component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 1,
   "fromUser": false
@@ -32,11 +60,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.eda_report.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/Sega/PycharmProjects/PythonProject/artifacts",
     "vue.rearranger.settings.migration": "true"
   }
@@ -45,6 +76,9 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Sega\PycharmProjects\PythonProject\artifacts" />
       <recent name="C:\Users\Sega\PycharmProjects\PythonProject\data" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\retrieval\v1" />
     </key>
   </component>
   <component name="RunManager">
@@ -88,6 +122,31 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="eda_report" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="OKPD classifier V2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/analysis" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/analysis/eda_report.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -235,6 +294,11 @@
       <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.eda_report" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -250,11 +314,38 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1778958732971</updated>
-      <workItem from="1778958734032" duration="1810000" />
+      <workItem from="1778958734032" duration="10388000" />
     </task>
+    <task id="LOCAL-00001" summary="Initial commit">
+      <option name="closed" value="true" />
+      <created>1778960889678</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1778960889678</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/OKPD_classifier_V2$eda_report.coverage" NAME="eda_report Coverage Results" MODIFIED="1778965509140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/analysis" />
   </component>
 </project>

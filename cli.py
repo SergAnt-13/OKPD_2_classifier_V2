@@ -16,7 +16,8 @@ def main():
             "train-biencoder",
             "train-classifier",
             "build-faiss",
-            "evaluate"
+            "evaluate",
+            "eda"
         ]
     )
 
@@ -39,6 +40,15 @@ def main():
     elif args.command == "evaluate":
         print("Evaluation pipeline")
 
+    elif args.command == "eda":
+        from src.analysis.eda_report import OKPDEDA
+        import pandas as pd
+        from config.settings import TRAINING_DATA_DIR
+
+        df = pd.read_excel(TRAINING_DATA_DIR / "train.xlsx")
+
+        eda = OKPDEDA(df, output_dir=TRAINING_DATA_DIR / "eda_report")
+        eda.run_all()
 
 if __name__ == "__main__":
     main()

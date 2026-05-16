@@ -1,25 +1,17 @@
 import re
+from src.features.text_views import TextViews
 
 
 class TextPreprocessor:
 
-    @staticmethod
-    def clean_for_classifier(text: str) -> str:
-        text = text.lower().strip()
-
-        text = re.sub(r"\s+", " ", text)
-
-        return text
-
-    @staticmethod
-    def clean_for_embedding(text: str) -> str:
+    def process(self, text: str) -> dict:
         """
-        Минимальная очистка.
-        ГОСТы, цифры, артикулы сохраняем.
+        Возвращает 2 представления:
+        - classifier_input
+        - retrieval_input
         """
 
-        text = text.strip()
-
-        text = re.sub(r"\s+", " ", text)
-
-        return text
+        return {
+            "classifier_text": TextViews.classifier_view(text),
+            "retrieval_text": TextViews.retrieval_view(text)
+        }
