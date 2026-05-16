@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+sentence-transformers
+transformers
+torch
+faiss-cpu
+openpyxl
+pyyaml
+tqdm
+loguru
