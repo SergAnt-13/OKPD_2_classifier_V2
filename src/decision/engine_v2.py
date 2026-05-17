@@ -11,103 +11,77 @@ class DecisionResult:
 
 class DecisionEngineV2:
 
-    def __init__(self,
-                 alpha=0.5,
-                 beta=0.3,
-                 gamma=0.2):
+    def __init__(self):
+        self.auto_threshold = 0.85
+        self.review_threshold = 0.65
 
-        """
-        alpha = retrieval weight
-        beta = classifier weight
-        gamma = margin penalty weight
-        """
-
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
-
-    # -------------------------
-    # MAIN DECISION LOGIC
-    # -------------------------
-
-    def decide(self,
-               classifier_pred: dict,
-               retrieval_pred: dict):
+    def decide(self, classifier_pred: dict, retrieval_pred: dict):
 
         reasons = []
 
         # -------------------------
-        # 1. RETRIEVAL SCORE
+        # RETRIEVAL
         # -------------------------
         top_retrieval = retrieval_pred["candidates"][0]
+        retrieval_code = top_retrieval["code"]
         retrieval_score = top_retrieval["score"]
-        code = top_retrieval["code"]
 
         # -------------------------
-        # 2. CLASSIFIER SCORE
+        # CLASSIFIER
         # -------------------------
-        clf_conf = classifier_pred["confidence"]
         clf_code = classifier_pred["code"]
-
-        # -------------------------
-        # 3. AGREEMENT
-        # -------------------------
-        agreement = (clf_code == code)
-
-        if agreement:
-            reasons.append("classifier == retrieval")
-
-        # -------------------------
-        # 3.5 ADVANCED CONFIDENCE
-        # -------------------------
-
-        probs = classifier_pred.get("probs", None)
+        clf_conf = classifier_pred["confidence"]
         top1 = classifier_pred.get("top1_prob", clf_conf)
         top2 = classifier_pred.get("top2_prob", 0.0)
 
-        confidence_components = {
-            "top1": top1,
-            "top2": top2,
-            "probs": probs
-        }
+        # -------------------------
+        # AGREEMENT
+        # -------------------------
+        agreement = (clf_code == retrieval_code)
+        if agreement:
+            reasons.append("agreement")
 
         # -------------------------
-        # 4. COMBINED SCORE
+        # MARGIN
         # -------------------------
-        final_score = (
-            self.alpha * retrieval_score +
-            self.beta * clf_conf
-        )
+        margin = top1 - top2
+        if margin < 0.2:
+            reasons.append("low_margin")
 
         # -------------------------
-        # 5. DECISION RULES
+        # BASE CONFIDENCE
         # -------------------------
+        base_conf = 0.6 * retrieval_score + 0.4 * clf_conf
 
-        if final_score > 0.85 and agreement:
+        # penalties
+        if not agreement:
+            base_conf *= 0.85
+            reasons.append("disagreement")
+
+        if retrieval_score < 0.4:
+            base_conf *= 0.8
+            reasons.append("low_retrieval")
+
+        if clf_conf < 0.5:
+            base_conf *= 0.85
+            reasons.append("low_classifier")
+
+        if margin < 0.2:
+            base_conf *= 0.9
+
+        # -------------------------
+        # DECISION
+        # -------------------------
+        if base_conf >= self.auto_threshold and agreement:
             mode = "AUTO"
-
-        elif final_score > 0.65:
+        elif base_conf >= self.review_threshold:
             mode = "REVIEW"
-
         else:
             mode = "MANUAL"
 
-        # -------------------------
-        # 6. OOD / UNCERTAINTY FLAGS
-        # -------------------------
-
-        if retrieval_score < 0.4:
-            reasons.append("low retrieval similarity")
-
-        if clf_conf < 0.5:
-            reasons.append("low classifier confidence")
-
-        if not agreement:
-            reasons.append("model disagreement")
-
         return DecisionResult(
-            code=code,
+            code=retrieval_code,
             mode=mode,
-            confidence=final_score,
+            confidence=float(base_conf),
             reason=reasons
         )
