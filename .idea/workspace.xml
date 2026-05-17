@@ -2,16 +2,34 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="Iteration">
-      <change afterPath="$PROJECT_DIR$/src/inference/pipeline.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/bert_classifier.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/preprocessing/cleaner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/retrieval/retriever.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/evaluation/evaluate_retrieval.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/preprocessing/lemmatizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/retrieval/build_index.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/taxonomy/okpd_tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/training/train_biencoder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test_lemmatization.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/decision/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/decision/engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/taxonomy/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/common/pipeline_types.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/confidence/engine_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/confidence/risk_engine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/inference/pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/inference/pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/inference/predict.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/preprocessing/cleaner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocessing/cleaner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/preprocessing/text_views.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/retrieval/retriever.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/encoder.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/faiss_index.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/class_index.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/hierarchical_retriever.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/leaf_index.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/output_contract.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/taxonomy/loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/taxonomy/node.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/utils.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +71,8 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.eda_report.executor": "Run",
+    "Python.project_snapshot.executor": "Run",
+    "Python.test_lemmatization.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -77,7 +97,7 @@
       <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\evaluation" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.test_lemmatization">
     <configuration default="true" type="DjangoTestsConfigurationType">
       <module name="OKPD classifier V2" />
       <option name="ENV_FILES" value="" />
@@ -143,6 +163,56 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="C:\Users\Sega\PycharmProjects\PythonProject\src\evaluation\eda_report.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="project_snapshot" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="OKPD classifier V2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_snapshot.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_lemmatization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="OKPD classifier V2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_lemmatization.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -292,6 +362,8 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test_lemmatization" />
+        <item itemvalue="Python.project_snapshot" />
         <item itemvalue="Python.eda_report" />
       </list>
     </recent_temporary>
@@ -310,7 +382,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1778958732971</updated>
-      <workItem from="1778958734032" duration="16957000" />
+      <workItem from="1778958734032" duration="33300000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -344,7 +416,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779007813913</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Iteration">
+      <option name="closed" value="true" />
+      <created>1779008780358</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1779008780358</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -368,5 +448,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/OKPD_classifier_V2$eda_report.coverage" NAME="eda_report Coverage Results" MODIFIED="1778965509140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/analysis" />
+    <SUITE FILE_PATH="coverage/OKPD_classifier_V2$test_lemmatization.coverage" NAME="test_lemmatization Coverage Results" MODIFIED="1779011230257" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/OKPD_classifier_V2$project_snapshot.coverage" NAME="project_snapshot Coverage Results" MODIFIED="1779009727595" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

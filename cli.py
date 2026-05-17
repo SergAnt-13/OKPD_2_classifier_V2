@@ -25,6 +25,10 @@ def main():
     eda_cmd = subparsers.add_parser("eda", help="Запустить EDA")
     eda_cmd.add_argument("--input", type=str, default=None, help="Путь к файлу с данными")
 
+    # --- debug-search ---
+    debug_cmd = subparsers.add_parser("debug-search", help="Показать топ-10 кандидатов для текста")
+    debug_cmd.add_argument("text", type=str, help="Текст товара")
+
     args = parser.parse_args()
 
     if args.command == "predict-text":
@@ -36,14 +40,62 @@ def main():
         print(f"Роутинг: {result['routing']}")
         print(f"Причины: {', '.join(result['reasons'])}")
 
+
     elif args.command == "predict":
+
+        from datetime import datetime
+
+        import json
+
         pipeline = InferencePipeline()
+
         input_path = Path(args.input)
+
+        # Папка запуска с датой и временем
+
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+        run_dir = Path("runs") / timestamp / "predictions"
+
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        # Определяем выходной файл
+
+        if args.output:
+
+            output_path = Path(args.output)
+
+        else:
+
+            output_path = input_path.with_suffix(".predicted.xlsx")
+
+        # Если путь не абсолютный, кладём в run_dir
+
+        if not output_path.is_absolute():
+            output_path = run_dir / output_path.name
+
         df = pipeline.predict_file(input_path, text_column=args.column)
 
-        output_path = args.output or input_path.with_suffix(".predicted.xlsx")
         df.to_excel(output_path, index=False)
+
+        # Конфиг запуска (опционально)
+
+        config = {
+
+            "input": str(input_path.absolute()),
+
+            "output": str(output_path.absolute()),
+
+            "text_column": args.column,
+
+            "timestamp": timestamp,
+
+        }
+
+        (run_dir.parent / "run_config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False))
+
         print(f"Результаты сохранены в {output_path}")
+
         print(f"Распределение роутинга:\n{df['routing'].value_counts().to_string()}")
 
     elif args.command == "eda":
@@ -57,8 +109,25 @@ def main():
         eda = OKPDEDA(df, output_dir=output_dir)
         eda.run_all()
 
+    elif args.command == "debug-search":
+        from src.retrieval.retriever import Retriever
+
+        retriever = Retriever()
+        # Используем нормализацию из того же cleaner, что и у retriever (с сокращениями)
+        query = retriever.cleaner.retrieval_view_normalized(args.text)
+        result = retriever.search_normalized(query, top_k=10)
+
+        print(f"\nЗапрос: {args.text}")
+        print(f"Нормализованный: {query}\n")
+        print(f"{'Ранг':<5} {'Код':<15} {'Родитель':<15} {'Score':<8} Название")
+        print("-" * 90)
+        for i, cand in enumerate(result["candidates"], 1):
+            print(f"{i:<5} {cand['code']:<15} {cand['parent_code']:<15} {cand['score']:.4f}   {cand['title']}")
+
     else:
         parser.print_help()
+
+
 
 
 if __name__ == "__main__":

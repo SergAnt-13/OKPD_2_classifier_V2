@@ -6,7 +6,7 @@ from pathlib import Path
 from src.preprocessing.cleaner import TextCleaner
 from src.retrieval.retriever import Retriever
 from src.models.bert_classifier import BERTClassifier
-from src.decision.engine import DecisionEngine, DecisionResult
+from src.decision.engine import DecisionEngine
 
 
 class InferencePipeline:
@@ -27,25 +27,9 @@ class InferencePipeline:
         self.engine = engine or DecisionEngine()
 
     def predict_single(self, text: str) -> Dict:
-        """
-        Предсказание для одного товара.
-
-        Returns:
-            {
-                "text": str,
-                "top_candidates": list,
-                "final_prediction": str,
-                "confidence": float,
-                "margin": float,
-                "routing": str,
-                "risk_level": str,
-                "requires_review": bool,
-                "reasons": list,
-            }
-        """
         # 1. Preprocessing
         text_for_bert = self.cleaner.classifier_view(text)
-        text_for_retrieval = self.cleaner.retrieval_view(text)
+        text_for_retrieval = self.cleaner.retrieval_view_normalized(text)
 
         # 2. Retrieval
         retrieval_result = self.retriever.search(text_for_retrieval)
@@ -71,11 +55,9 @@ class InferencePipeline:
         }
 
     def predict_batch(self, texts: List[str]) -> List[Dict]:
-        """Предсказание для списка товаров."""
         return [self.predict_single(text) for text in texts]
 
     def predict_file(self, file_path: Path, text_column: str = "Номенклатура") -> pd.DataFrame:
-        """Предсказание для файла (CSV/Excel). Возвращает DataFrame с результатами."""
         if file_path.suffix == ".csv":
             df = pd.read_csv(file_path)
         else:
@@ -83,7 +65,6 @@ class InferencePipeline:
 
         results = self.predict_batch(df[text_column].astype(str).tolist())
 
-        # Добавляем колонки с результатами
         df["predicted_code"] = [r["final_prediction"] for r in results]
         df["confidence"] = [r["confidence"] for r in results]
         df["routing"] = [r["routing"] for r in results]
