@@ -1,35 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="Iteration">
-      <change afterPath="$PROJECT_DIR$/src/evaluation/evaluate_retrieval.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/preprocessing/lemmatizer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/retrieval/build_index.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/taxonomy/okpd_tree.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/training/train_biencoder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_lemmatization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/pipeline_types.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/confidence/engine_v2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/confidence/risk_engine.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/inference/pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/inference/pipeline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/inference/predict.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocessing/cleaner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocessing/cleaner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocessing/text_views.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/retrieval/retriever.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/encoder.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/faiss_index.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v1/service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/class_index.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/hierarchical_retriever.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/leaf_index.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/retrieval/v2/output_contract.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/taxonomy/loader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/taxonomy/node.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/utils.py" beforeDir="false" />
+    <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="Iteration (not bad btw)">
+      <change beforePath="$PROJECT_DIR$/src/training/train_biencoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/training/train_biencoder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -382,7 +355,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1778958732971</updated>
-      <workItem from="1778958734032" duration="33300000" />
+      <workItem from="1778958734032" duration="33632000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -424,7 +397,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779008780358</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Iteration (not bad btw)">
+      <option name="closed" value="true" />
+      <created>1779025578166</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1779025578166</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -444,7 +425,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
     <MESSAGE value="Iteration" />
-    <option name="LAST_COMMIT_MESSAGE" value="Iteration" />
+    <MESSAGE value="Iteration (not bad btw)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Iteration (not bad btw)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/OKPD_classifier_V2$eda_report.coverage" NAME="eda_report Coverage Results" MODIFIED="1778965509140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/analysis" />

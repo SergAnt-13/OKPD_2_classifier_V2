@@ -14,7 +14,7 @@ import argparse
 import pandas as pd
 from tqdm import tqdm
 
-from config.settings import TRAINING_DATA_DIR, PROCESSED_DATA_DIR, REFERENCE_DIR
+from config.settings import TRAINING_DATA_DIR, PROCESSED_DATA_DIR, REFERENCE_DIR, BIENCODER_DIR
 from src.retrieval.retriever import Retriever
 from src.preprocessing.cleaner import TextCleaner
 
@@ -67,7 +67,10 @@ def evaluate_retrieval(k_values=(1, 5, 10), use_lemmatizer=False):
         print(f"Кеш сохранён: {cache_path}")
 
     # 5. Создаём retriever (базовая MiniLM, без model_dir)
-    retriever = Retriever(use_lemmatizer=use_lemmatizer)
+    retriever = Retriever(
+        use_lemmatizer=use_lemmatizer,
+        model_dir=BIENCODER_DIR if BIENCODER_DIR.exists() else None,
+    )
 
     # 6. Оценка
     recall = {k: 0 for k in k_values}
