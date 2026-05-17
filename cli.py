@@ -13,7 +13,7 @@ def main():
         "command",
         choices=[
             "predict",
-            "train-biencoder",
+            "train-bi_encoder",
             "train-classifier",
             "build-faiss",
             "evaluate",
@@ -28,7 +28,7 @@ def main():
     if args.command == "predict":
         print("Prediction pipeline")
 
-    elif args.command == "train-biencoder":
+    elif args.command == "train-bi_encoder":
         print("Training bi-encoder")
 
     elif args.command == "train-classifier":
@@ -41,7 +41,7 @@ def main():
         print("Evaluation pipeline")
 
     elif args.command == "eda":
-        from src.analysis.eda_report import OKPDEDA
+        from src.evaluation.eda_report import OKPDEDA
         import pandas as pd
         from config.settings import TRAINING_DATA_DIR
 

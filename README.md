@@ -1,86 +1,65 @@
-АРХИТЕКТУРА ПРОЕКТА v2
-
-📁 1. PROJECT ROOT
-project/
-📁 2. DATA LAYER
-data/
-├── raw/  --Номенклатурная выгрузка
-├── processed/ --результат preprocessing.
-├── training/
-├── pseudo_labels/
-├── taxonomy/  --Классификатор ОКПД-2 (codes, hierarchy, aliases, metadata, inference/входные файлы для предсказания.)
-├── evaluation/
-└── inference/
-
-taxonomy/
-
-ОКПД-2:
-
-
-📁 3. ARTIFACTS LAYER
-   artifacts/
-   ├── biencoder/
-   ├── classifier/
-   ├── faiss/
-   ├── reranker/
-   ├── metrics/
-   └── runs/
-
-📁 4. SRC STRUCTURE
-
-   📁 retrieval/
-   retrieval/
-   отвечает ТОЛЬКО за:
-   embeddings
-   FAISS
-   retrieval
-   similarity
-   
-   📁 classifier/
-   classifier/
-   отвечает ТОЛЬКО за:
-   BERT
-   logits
-   entropy
-   classifier inference
-   
-   📁 hierarchy/
-   hierarchy/
-   отвечает ТОЛЬКО за:
-   tree
-   parent-child logic
-   hierarchy scoring
-   
-   📁 preprocessing/
-   preprocessing/
-   разделить: raw preprocessing и embedding preprocessing
-   
-   📁 confidence/
-   confidence/
-   отдельный модуль!
-   отвечает за:
-   margin
-   entropy
-   agreement
-   risk scoring
-   OOD detection
-   
-   📁 pseudo_labeling/
-   pseudo_labeling/
-   отдельный isolated pipeline
-   
-   📁 evaluation/
-   evaluation/
-   считает:
-   Recall@K
-   MRR
-   coverage
-   uncertainty stats
-   confusion clusters
-   
-   📁 pipelines/
-   pipelines/
-   только orchestration.
+АРХИТЕКТУРА ПРОЕКТА
+OKPD_2_classifier_V2/
+│
+├── config/
+│   └── settings.py                # пути и автосоздание папок
+│
+├── data/
+│   ├── raw/                       # исходные файлы
+│   ├── processed/                 # после preprocessing
+│   ├── training/                  # train/val/test сплиты
+│   └── reference/                 # okpd2_full.xlsx
+│
+├── artifacts/
+│   ├── classifier/                # BERT (веса, конфиг)
+│   ├── bi_encoder/                # bi-encoder для retrieval
+│   ├── faiss/                     # FAISS индекс
+│   └── metrics/                   # сводные метрики (опционально)
+│
+├── runs/                          # история экспериментов
+│
+├── src/
+│   ├── ingestion/
+│   │   └── loader.py              # загрузка сырых данных
+│   │
+│   ├── preprocessing/
+│   │   └── cleaner.py             # бывший text_views.py: classifier_view, retrieval_view
+│   │
+│   ├── taxonomy/
+│   │   └── okpd_tree.py           # работа с иерархией ОКПД-2
+│   │
+│   ├── retrieval/
+│   │   ├── embedder.py            # bi-encoder, эмбеддинги
+│   │   ├── faiss_index.py         # построение/загрузка FAISS
+│   │   └── retriever.py           # поиск top-K
+│   │
+│   ├── models/
+│   │   └── bert_classifier.py     # класс BERT-классификатора
+│   │
+│   ├── decision/
+│   │   └── engine.py              # единственный DecisionEngine (вобрал confidence/engine_v2 и risk_engine)
+│   │
+│   ├── inference/
+│   │   └── pipeline.py            # единый пайплайн инференса
+│   │
+│   ├── evaluation/
+│   │   ├── analysis.py            # EDA (перенесённый eda_report)
+│   │   ├── metrics.py             # все метрики
+│   │   └── reporter.py            # генерация отчётов/графиков
+│   │
+│   ├── training/
+│   │   ├── train_bert.py          # обучение классификатора
+│   │   └── train_biencoder.py     # обучение bi-encoder
+│   │
+│   ├── common/
+│   │   └── schemas.py             # dataclass'ы (ClassifierOutput, DecisionResult и т.п.)
+│   │
+│   └── utils/
+│       └── helpers.py             # мелкие утилиты (softmax, загрузка csv и пр.)
+│
+├── cli.py                         # точка входа: train-classifier, predict, evaluate, eda
+├── requirements.txt
+└── README.md
 
 
 

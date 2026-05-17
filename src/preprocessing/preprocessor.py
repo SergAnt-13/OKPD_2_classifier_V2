@@ -1,5 +1,4 @@
-import re
-from src.features.text_views import TextViews
+from src.preprocessing.text_views import TextViews
 
 
 class TextPreprocessor:

@@ -2,11 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="595caf4c-17ed-40be-b9ed-787e9f877a9f" name="Changes" comment="Iteration">
-      <change afterPath="$PROJECT_DIR$/inference/predict.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/classifier/output_contract.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/retrieval/v2/output_contract.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/decision/engine_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/decision/engine_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/inference/predict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/analysis/eda_report.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/evaluation/eda_report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/classifier/output_contract.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/decision/engine_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/decision/engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/text_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocessing/text_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hierarchy/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/taxonomy/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocessing/preprocessor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +71,11 @@
       <recent name="C:\Users\Sega\PycharmProjects\PythonProject\data" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\retrieval\v1" />
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\preprocessing" />
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\taxonomy" />
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\decision" />
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src\evaluation" />
+      <recent name="C:\Users\Sega\PycharmProjects\PythonProject\src" />
     </key>
   </component>
   <component name="RunManager">
@@ -133,7 +143,7 @@
       <option name="DEBUG_JUST_MY_CODE" value="false" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/analysis/eda_report.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\Sega\PycharmProjects\PythonProject\src\evaluation\eda_report.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -301,7 +311,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1778958732971</updated>
-      <workItem from="1778958734032" duration="12293000" />
+      <workItem from="1778958734032" duration="15821000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -319,7 +329,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778972149135</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Iteration">
+      <option name="closed" value="true" />
+      <created>1779004079722</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1779004079722</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
