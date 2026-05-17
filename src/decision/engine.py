@@ -1,80 +1,119 @@
-from dataclasses import dataclass
+# src/decision/engine.py
+from dataclasses import dataclass, field
+from typing import List, Optional
+import numpy as np
 
 
 @dataclass
 class DecisionResult:
-    code: str | None
+    """Финальное решение по товару."""
+    code: Optional[str]
     mode: str  # AUTO / REVIEW / MANUAL
     confidence: float
-    reason: list
+    reasons: List[str] = field(default_factory=list)
+    risk_score: int = 0
 
 
-class DecisionEngineV2:
+class DecisionEngine:
+    """
+    Центр управления риском.
+    Объединяет сигналы retrieval и classifier, принимает решение о роутинге.
+    """
 
-    def __init__(self):
-        self.auto_threshold = 0.85
-        self.review_threshold = 0.65
+    def __init__(
+        self,
+        auto_threshold: float = 0.85,
+        review_threshold: float = 0.65,
+        alpha: float = 0.5,      # вес retrieval
+        beta: float = 0.3,       # вес classifier
+        gamma: float = 0.2,      # вес margin
+    ):
+        self.auto_threshold = auto_threshold
+        self.review_threshold = review_threshold
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
 
-    def decide(self, classifier_pred: dict, retrieval_pred: dict):
+    def decide(
+        self,
+        classifier_pred: dict,
+        retrieval_pred: dict,
+        hierarchy_consistent: bool = True,
+    ) -> DecisionResult:
+        """
+        Принимает решение на основе сигналов.
 
+        Args:
+            classifier_pred: {"code": str, "confidence": float, "margin": float, "entropy": float}
+            retrieval_pred: {"candidates": [{"code": str, "score": float}, ...]}
+            hierarchy_consistent: согласована ли иерархия
+
+        Returns:
+            DecisionResult с кодом, модой, причинами
+        """
         reasons = []
 
-        # -------------------------
-        # RETRIEVAL
-        # -------------------------
+        # --- 1. RETRIEVAL ---
         top_retrieval = retrieval_pred["candidates"][0]
         retrieval_code = top_retrieval["code"]
         retrieval_score = top_retrieval["score"]
 
-        # -------------------------
-        # CLASSIFIER
-        # -------------------------
-        clf_code = classifier_pred["code"]
-        clf_conf = classifier_pred["confidence"]
-        top1 = classifier_pred.get("top1_prob", clf_conf)
-        top2 = classifier_pred.get("top2_prob", 0.0)
+        # --- 2. CLASSIFIER ---
+        clf_code = classifier_pred.get("code")
+        clf_conf = classifier_pred.get("confidence", 0.0)
+        margin = classifier_pred.get("margin", 0.0)
+        entropy = classifier_pred.get("entropy", 0.0)
 
-        # -------------------------
-        # AGREEMENT
-        # -------------------------
+        # --- 3. AGREEMENT ---
         agreement = (clf_code == retrieval_code)
         if agreement:
-            reasons.append("agreement")
+            reasons.append("classifier == retrieval")
+        else:
+            reasons.append("model disagreement")
 
-        # -------------------------
-        # MARGIN
-        # -------------------------
-        margin = top1 - top2
-        if margin < 0.2:
-            reasons.append("low_margin")
+        # --- 4. COMBINED SCORE ---
+        final_score = (
+            self.alpha * retrieval_score +
+            self.beta * clf_conf +
+            self.gamma * margin
+        )
 
-        # -------------------------
-        # BASE CONFIDENCE
-        # -------------------------
-        base_conf = 0.6 * retrieval_score + 0.4 * clf_conf
-
-        # penalties
+        # --- 5. PENALTIES ---
         if not agreement:
-            base_conf *= 0.85
-            reasons.append("disagreement")
-
+            final_score *= 0.85
         if retrieval_score < 0.4:
-            base_conf *= 0.8
-            reasons.append("low_retrieval")
-
+            final_score *= 0.8
+            reasons.append("low retrieval similarity")
         if clf_conf < 0.5:
-            base_conf *= 0.85
-            reasons.append("low_classifier")
-
+            final_score *= 0.85
+            reasons.append("low classifier confidence")
         if margin < 0.2:
-            base_conf *= 0.9
+            final_score *= 0.9
+            reasons.append("low margin")
+        if entropy > 1.5:
+            final_score *= 0.85
+            reasons.append("high entropy")
+        if not hierarchy_consistent:
+            final_score *= 0.8
+            reasons.append("hierarchy inconsistent")
 
-        # -------------------------
-        # DECISION
-        # -------------------------
-        if base_conf >= self.auto_threshold and agreement:
+        # --- 6. RISK SCORE (из risk_engine) ---
+        risk_score = 0
+        if retrieval_score < 0.75:
+            risk_score += 2
+        if margin < 0.15:
+            risk_score += 2
+        if entropy > 1.5:
+            risk_score += 1
+        if not agreement:
+            risk_score += 3
+        if not hierarchy_consistent:
+            risk_score += 3
+
+        # --- 7. ROUTING ---
+        if risk_score <= 2 and final_score >= self.auto_threshold:
             mode = "AUTO"
-        elif base_conf >= self.review_threshold:
+        elif risk_score <= 5 or final_score >= self.review_threshold:
             mode = "REVIEW"
         else:
             mode = "MANUAL"
@@ -82,6 +121,7 @@ class DecisionEngineV2:
         return DecisionResult(
             code=retrieval_code,
             mode=mode,
-            confidence=float(base_conf),
-            reason=reasons
+            confidence=round(float(final_score), 4),
+            reasons=reasons,
+            risk_score=risk_score,
         )
