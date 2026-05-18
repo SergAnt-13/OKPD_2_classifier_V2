@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from sentence_transformers import SentenceTransformer
-from config.settings import FAISS_DIR, REFERENCE_DIR
+from config.settings import FAISS_DIR, REFERENCE_DIR, BIENCODER_DIR
 from src.preprocessing.cleaner import TextCleaner
 import torch
 
@@ -15,7 +15,7 @@ class Retriever:
     """
     Семантический поиск по справочнику ОКПД-2.
     Использует bi-encoder и FAISS.
-    Индекс и маппинг загружаются лениво при первом поиске.
+    При отсутствии model_dir пробует загрузить обученную модель из artifacts/bi_encoder/.
     """
 
     def __init__(
@@ -31,6 +31,10 @@ class Retriever:
             abbreviations_path=REFERENCE_DIR / "сокращения.xlsx",
             use_lemmatizer=use_lemmatizer,
         )
+        # Автоматически пробуем дообученную модель
+        if model_dir is None:
+            if BIENCODER_DIR.exists():
+                model_dir = BIENCODER_DIR
         if model_dir and Path(model_dir).exists():
             self.model = SentenceTransformer(str(model_dir), device=device)
         else:
@@ -49,7 +53,6 @@ class Retriever:
     def _lazy_load(self) -> None:
         if self._loaded:
             return
-
         if not self.index_path.exists():
             raise FileNotFoundError(
                 f"FAISS-индекс не найден: {self.index_path}\n"
@@ -60,16 +63,13 @@ class Retriever:
                 f"Файл маппинга не найден: {self.id_map_path}\n"
                 f"Сначала запустите: python src/retrieval/build_index.py"
             )
-
         print(f"Загрузка FAISS-индекса из {self.index_path}...")
         self.index = faiss.read_index(str(self.index_path))
-
         print(f"Загрузка маппинга из {self.id_map_path}...")
         self.id_map = pd.read_csv(self.id_map_path)
         self.codes = self.id_map["code"].values
         self.parent_codes = self.id_map["parent_code"].values
         self.names = self.id_map["name"].values
-
         self._loaded = True
 
     def search(self, text: str, top_k: int = 5) -> Dict:
@@ -77,12 +77,9 @@ class Retriever:
         query_norm = self.cleaner.retrieval_view_normalized(text)
         if not query_norm.strip():
             return {"candidates": []}
-
         query_emb = self.model.encode([query_norm], convert_to_numpy=True)
         faiss.normalize_L2(query_emb)
-
         scores, indices = self.index.search(query_emb, top_k)
-
         candidates = []
         for score, idx in zip(scores[0], indices[0]):
             if 0 <= idx < len(self.codes):
@@ -100,12 +97,9 @@ class Retriever:
         self._lazy_load()
         if not normalized_text.strip():
             return {"candidates": []}
-
         query_emb = self.model.encode([normalized_text], convert_to_numpy=True)
         faiss.normalize_L2(query_emb)
-
         scores, indices = self.index.search(query_emb, top_k)
-
         candidates = []
         for score, idx in zip(scores[0], indices[0]):
             if 0 <= idx < len(self.codes):
@@ -119,37 +113,37 @@ class Retriever:
                 )
         return {"candidates": candidates}
 
-    def search_with_hierarchy(
+    def search_with_soft_hierarchy(
         self,
-        text: str,
+        normalized_text: str,
         top_k: int = 5,
         top_n_broad: int = 50,
-        min_parent_agreement: int = 3,
+        boost_factor: float = 1.05,
+        penalty_factor: float = 0.95,
     ) -> Dict:
         """
-        Двухэтапный поиск с учётом иерархии.
-        1. Широкий поиск (top_n_broad кандидатов).
-        2. Определяем наиболее частую родительскую ветку среди top-3 результатов.
-        3. Оставляем только кандидатов из этой ветки и берём top_k.
+        Мягкое иерархическое переранжирование.
+        Принимает УЖЕ НОРМАЛИЗОВАННЫЙ текст.
         """
-        # Этап 1: широкий поиск
-        broad_result = self.search_normalized(text, top_k=top_n_broad)
+        # Широкий поиск (используем search_normalized, чтобы избежать повторной очистки)
+        broad_result = self.search_normalized(normalized_text, top_k=top_n_broad)
         candidates = broad_result["candidates"]
         if not candidates:
             return broad_result
 
-        # Определяем родительский код среди top-3
+        # Доминирующий родитель по top-3
         top_n = min(3, len(candidates))
         parent_votes = [
             cand.get("parent_code", cand["code"][:2]) for cand in candidates[:top_n]
         ]
         best_parent = max(set(parent_votes), key=parent_votes.count)
 
-        # Этап 2: фильтруем всех кандидатов по родителю
-        filtered = [
-            cand
-            for cand in candidates
-            if cand.get("parent_code", cand["code"][:2]) == best_parent
-        ]
-        result = filtered[:top_k]
-        return {"candidates": result}
+        for cand in candidates:
+            parent = cand.get("parent_code", cand["code"][:2])
+            if parent == best_parent:
+                cand["score"] *= boost_factor
+            else:
+                cand["score"] *= penalty_factor
+
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+        return {"candidates": candidates[:top_k]}

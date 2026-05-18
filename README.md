@@ -1,126 +1,147 @@
-АРХИТЕКТУРА ПРОЕКТА
+# OKPD_2_classifier_V2
+
+Гибридная система классификации товарной номенклатуры по кодам ОКПД-2 с управлением риском ошибки.  
+Проект решает задачу **extreme multi-class classification** (19 454 класса) в условиях **long‑tail**, **шумных ERP‑данных** и **частичного обучения** (1 500 экспертных примеров).
+
+## 🧠 Ключевая идея (научная новизна)
+
+В задачах экстремальной классификации с длинным хвостом распределения более устойчивым является **гибридный подход**: `retrieval + classifier + decision engine`, а не одиночная модель softmax.  
+Мы строим трёхуровневую систему, которая:
+
+*   **Retrieval Layer (bi-encoder + FAISS)** — работает как «память», покрывает все 19k кодов, хорошо обрабатывает редкие и невидимые (unseen) классы.
+*   **Classifier Layer (RuBERT)** — быстрый prior на частых (head) классах, обученный на исторических данных предприятия.
+*   **Decision Engine** — объединяет сигналы, управляет риском и маршрутизирует товары в зоны **AUTO / REVIEW / MANUAL**.
+
+> Основная цель: не максимизация accuracy, а **минимизация high‑confidence errors** (уверенных ошибок).
+
+## 📊 Ключевые метрики (на экспертной выборке из 1 475 товаров)
+
+### Retrieval (bi-encoder + стеммированный FAISS)
+| Метрика   | Значение |
+|-----------|----------|
+| Recall@1  | 0.27     |
+| Recall@5  | 0.55     |
+| Recall@10 | 0.65     |
+| MRR       | 0.38     |
+
+### Классификатор (RuBERT, 148 классов)
+| Метрика       | Значение |
+|---------------|----------|
+| Accuracy      | 0.67     |
+| Macro F1      | 0.31     |
+| Weighted F1   | 0.60     |
+
+### End-to-end (Risk‑Aware Decision Engine)
+| Режим  | Доля   | Точность |
+|--------|--------|----------|
+| AUTO   | 25.4%  | 92%      |
+| REVIEW | 70.6%  | помощь эксперту |
+| MANUAL | 4.0%   | честный отказ |
+
+## 🏗️ Архитектура проекта
 OKPD_2_classifier_V2/
-│
-├── config/
-│   └── settings.py                # пути и автосоздание папок
-│
+├── artifacts/ # обученные модели и индексы
+│ ├── bi_encoder/ # дообученный bi-encoder
+│ ├── classifier/ # RuBERT-классификатор
+│ └── faiss/ # FAISS-индексы (стеммированный и базовый)
 ├── data/
-│   ├── raw/                       # исходные файлы
-│   ├── processed/                 # после preprocessing
-│   ├── training/                  # train/val/test сплиты
-│   └── reference/                 # okpd2_full.xlsx
-│
-├── artifacts/
-│   ├── classifier/                # BERT (веса, конфиг)
-│   ├── bi_encoder/                # bi-encoder для retrieval
-│   ├── faiss/                     # FAISS индекс
-│   └── metrics/                   # сводные метрики (опционально)
-│
-├── runs/                          # история экспериментов
-│
+│ ├── raw/ # исходная номенклатура (all_nomenclature.xlsx)
+│ ├── processed/ # очищенные и нормализованные справочники
+│ ├── reference/ # ОКПД-2, список льготных кодов, сокращения
+│ └── training/ # золотая экспертная выборка (train.xlsx)
 ├── src/
-│   ├── ingestion/
-│   │   └── loader.py              # загрузка сырых данных
-│   │
-│   ├── preprocessing/
-│   │   └── cleaner.py             # бывший text_views.py: classifier_view, retrieval_view
-│   │
-│   ├── taxonomy/
-│   │   └── okpd_tree.py           # работа с иерархией ОКПД-2
-│   │
-│   ├── retrieval/
-│   │   ├── embedder.py            # bi-encoder, эмбеддинги
-│   │   ├── faiss_index.py         # построение/загрузка FAISS
-│   │   └── retriever.py           # поиск top-K
-│   │
-│   ├── models/
-│   │   └── bert_classifier.py     # класс BERT-классификатора
-│   │
-│   ├── decision/
-│   │   └── engine.py              # единственный DecisionEngine (вобрал confidence/engine_v2 и risk_engine)
-│   │
-│   ├── inference/
-│   │   └── pipeline.py            # единый пайплайн инференса
-│   │
-│   ├── evaluation/
-│   │   ├── analysis.py            # EDA (перенесённый eda_report)
-│   │   ├── metrics.py             # все метрики
-│   │   └── reporter.py            # генерация отчётов/графиков
-│   │
-│   ├── training/
-│   │   ├── train_bert.py          # обучение классификатора
-│   │   └── train_biencoder.py     # обучение bi-encoder
-│   │
-│   ├── common/
-│   │   └── schemas.py             # dataclass'ы (ClassifierOutput, DecisionResult и т.п.)
-│   │
-│   └── utils/
-│       └── helpers.py             # мелкие утилиты (softmax, загрузка csv и пр.)
-│
-├── cli.py                         # точка входа: train-classifier, predict, evaluate, eda
-├── requirements.txt
-└── README.md
+│ ├── decision/ # движок принятия решений (engine.py)
+│ ├── evaluation/ # скрипты оценки и генерации отчётов
+│ ├── inference/ # единый пайплайн инференса (pipeline.py)
+│ ├── models/ # обёртка BERT-классификатора
+│ ├── preprocessing/ # очистка текста, лемматизатор
+│ ├── retrieval/ # bi-encoder, FAISS, retriever
+│ ├── taxonomy/ # работа с иерархией ОКПД-2
+│ └── training/ # скрипты обучения моделей
+├── runs/ # история экспериментов
+├── cli.py # CLI-интерфейс
+└── requirements.txt
 
 
+## 🚀 Быстрый старт
 
-🧠 Точки входа
+### 1. Установка зависимостей
+```bash
+python -m venv .venv
+source .venv/bin/activate  # или .venv\Scripts\activate
+pip install -r requirements.txt
 
-TRAINING
-python cli.py train-biencoder
-python cli.py train-classifier
+2. Подготовка данных
+Поместите файлы в соответствующие папки:
 
-INDEXING
-python cli.py build-faiss
+data/reference/okpd_2.xlsx — полный классификатор ОКПД-2.
 
-PREDICTION
-python cli.py predict --input file.xlsx
+data/reference/vat_exempt_codes.xlsx — перечень кодов для НДС 10%.
 
-SAFE PSEUDO LABELS
-python cli.py generate-pseudo-labels
+data/reference/сокращения.xlsx — словарь профессиональных сокращений.
 
-EVALUATION
-python cli.py evaluate
+data/raw/all_nomenclature.xlsx — полная номенклатура.
 
-SINGLE SAMPLE
-python cli.py predict-text "Йогурт клубничный 5%"
+data/training/train.xlsx — экспертная выборка (1 500 записей).
 
-🧠 PREDICTION FLOW
+3. Построение индексов
+bash
+# Стеммированный индекс (основной)
+python src/retrieval/build_index_stemmed.py
+4. Обучение моделей
+bash
+# Bi-encoder для retrieval (на полной номенклатуре)
+python src/training/train_biencoder_full.py
 
-STEP 1
-preprocess.
+# Классификатор RuBERT
+python src/training/train_bert.py
+5. Инференс
+bash
+# Предсказание для одного товара
+python cli.py predict-text "Конфеты Птичье молоко"
 
-STEP 2
-retrieval:
-top_k candidates
+# Пакетная обработка файла
+python cli.py predict --input data/raw/all_nomenclature.xlsx --output result.xlsx
+📈 Оценка качества
+bash
+# Оценка retrieval
+python src/evaluation/evaluate_retrieval.py --stemmed-index
 
-STEP 3
-classifier validation.
+# Оценка классификатора
+python src/evaluation/evaluate_classifier.py
 
-STEP 4
-hierarchy scoring.
+# End-to-end оценка с роутингом
+python src/evaluation/evaluate_engine.py
 
-STEP 5
-risk scoring.
+# Генерация отчёта по НДС
+python src/evaluation/generate_vat_report.py
+📋 Примеры работы
+Товар	Предсказанный код	Название кода	Уверенность	Режим
+к.ш.в карамельной глазури	10.82.22.135	Конфеты шоколадные с грильяжными корпусами...	0.88	AUTO
+драже к.ш.	10.82.22.130	Конфеты шоколадные	0.95	AUTO
+Шоколад молочный 100г	10.82.22.112	Шоколад молочный в упакованном виде	0.92	AUTO
+Молоко сгущенное с сахаром 8.5%	10.51.51.113	Молоко сгущенное с сахаром	0.91	AUTO
+Сух.Кириешки ржан.100г	10.72.11.120	Изделия хлебобулочные сухарные	0.93	AUTO
+🛡️ Риск-ориентированный роутинг
+AUTO — модель уверена, обе компоненты согласны. Код присваивается автоматически.
 
-STEP 6
-routing:
+REVIEW — модель предлагает вариант, но требуется подтверждение эксперта.
 
-🟢 AUTO
-🟡 REVIEW
-🔴 MANUAL
-🧠 OUTPUT STRUCTURE
+MANUAL — модель не может принять решение, товар отправляется на ручную обработку.
 
-Это очень важно для аналитика.
+📦 Зависимости
+Python 3.10+
+PyTorch, Transformers, Sentence-Transformers
+FAISS, pandas, openpyxl, scikit-learn
+pymystem3, striprtf (опционально)
+tqdm, matplotlib, seaborn (для анализа)
+Полный список см. в requirements.txt.
 
-Результат НЕ должен быть:
-one code
-Должен быть:
-{
-  "text": "...",
-  "top_candidates": [...],
-  "final_prediction": "...",
-  "retrieval_score": 0.91,
-  "margin": 0.42,
-  "risk_level": "medium",
-  "requires_review": true
-}
+🧪 Эксперименты и развитие
+Стемминг Snowball повысил Recall@10 в 2.3 раза по сравнению с базовой очисткой.
+
+Дообучение bi-encoder на 27 тыс. записей предприятия улучшило MRR с 0.21 до 0.38.
+
+Фокусировка на пищевых кодах (класс 10) устранила галлюцинации типа «масло → нефтепродукты».
+
+Hard negatives, OOD‑детектор, reranker — следующие шаги для повышения точности.

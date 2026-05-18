@@ -5,6 +5,7 @@ from typing import Optional, Dict
 import pandas as pd
 
 from src.preprocessing.lemmatizer import Lemmatizer
+from src.preprocessing.hybrid_lemmatizer import HybridLemmatizer
 
 
 class TextCleaner:
@@ -18,15 +19,17 @@ class TextCleaner:
         self,
         abbreviations_path: Optional[Path] = None,
         use_lemmatizer: bool = False,
+        use_hybrid_lemmatizer=False
     ):
         self.abbreviations: Dict[str, str] = {}
         self.abbr_comments: Dict[str, str] = {}   # пока не используется
         if abbreviations_path and Path(abbreviations_path).exists():
             df = pd.read_excel(abbreviations_path, dtype=str)
             if "abbr" in df.columns and "expansion" in df.columns:
+                df["abbr_clean"] = df["abbr"].str.lower().str.strip().str.rstrip(".")
                 self.abbreviations = dict(
                     zip(
-                        df["abbr"].str.lower().str.strip(),
+                        df["abbr_clean"],
                         df["expansion"].str.strip(),
                     )
                 )
@@ -38,8 +41,11 @@ class TextCleaner:
                             df["comment"].str.strip(),
                         )
                     )
-        self.lemmatizer = Lemmatizer() if use_lemmatizer else None
-
+        self.lemmatizer = None
+        if use_hybrid_lemmatizer:
+            self.lemmatizer = HybridLemmatizer()
+        elif use_lemmatizer:
+            self.lemmatizer = Lemmatizer()  # старый Mystem из lemmatizer.py
     @staticmethod
     def remove_gost(text: str) -> str:
         for pattern in TextCleaner.GOST_PATTERNS:
@@ -57,7 +63,7 @@ class TextCleaner:
         tokens = re.findall(r"\b\w+(?:\.\w+)+\b|\b\w+\b|[^\w\s]", text)
         result = []
         for token in tokens:
-            token_lower = token.lower().strip(".")
+            token_lower = token.lower().rstrip(".")
             if token_lower in self.abbreviations:
                 result.append(self.abbreviations[token_lower])
             else:

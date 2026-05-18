@@ -1,119 +1,118 @@
 # src/decision/engine.py
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict
+from pathlib import Path
+import pandas as pd
 import numpy as np
-
+from src.taxonomy.okpd_tree import is_same_branch
 
 @dataclass
 class DecisionResult:
-    """Финальное решение по товару."""
     code: Optional[str]
-    mode: str  # AUTO / REVIEW / MANUAL
+    mode: str
     confidence: float
     reasons: List[str] = field(default_factory=list)
     risk_score: int = 0
 
-
 class DecisionEngine:
-    """
-    Центр управления риском.
-    Объединяет сигналы retrieval и classifier, принимает решение о роутинге.
-    """
-
     def __init__(
         self,
         auto_threshold: float = 0.85,
-        review_threshold: float = 0.65,
-        alpha: float = 0.5,      # вес retrieval
-        beta: float = 0.3,       # вес classifier
-        gamma: float = 0.2,      # вес margin
+        review_threshold: float = 0.40,
+        abbreviations_path: Optional[Path] = None,
+        class_prior_path: Optional[Path] = None,
     ):
         self.auto_threshold = auto_threshold
         self.review_threshold = review_threshold
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
+
+        # Prior Weighting
+        self.class_priors: Dict[str, float] = {}
+        if class_prior_path and Path(class_prior_path).exists():
+            prior_df = pd.read_csv(class_prior_path)
+            if 'code' in prior_df.columns and 'prior' in prior_df.columns:
+                max_prior = prior_df['prior'].max()
+                if max_prior > 0:
+                    prior_df['weight'] = prior_df['prior'] / max_prior
+                    self.class_priors = dict(zip(prior_df['code'], prior_df['weight']))
+
+        # Domain Boosting
+        self.domain_rules: Dict[str, List[str]] = {}
+        if abbreviations_path and Path(abbreviations_path).exists():
+            abbr_df = pd.read_excel(abbreviations_path, dtype=str)
+            if 'abbr' in abbr_df.columns and 'okpd_codes' in abbr_df.columns:
+                for _, row in abbr_df.iterrows():
+                    abbr = str(row['abbr']).lower().strip()
+                    codes_str = str(row['okpd_codes'])
+                    if pd.notna(codes_str) and codes_str:
+                        codes = [c.strip() for c in codes_str.split(';') if c.strip()]
+                        if codes:
+                            self.domain_rules[abbr] = codes
 
     def decide(
         self,
         classifier_pred: dict,
         retrieval_pred: dict,
-        hierarchy_consistent: bool = True,
+        hierarchy_consistent: Optional[bool] = None,
+        original_text: str = "",
     ) -> DecisionResult:
-        """
-        Принимает решение на основе сигналов.
-
-        Args:
-            classifier_pred: {"code": str, "confidence": float, "margin": float, "entropy": float}
-            retrieval_pred: {"candidates": [{"code": str, "score": float}, ...]}
-            hierarchy_consistent: согласована ли иерархия
-
-        Returns:
-            DecisionResult с кодом, модой, причинами
-        """
         reasons = []
 
-        # --- 1. RETRIEVAL ---
+        # --- 1. Извлечение сигналов ---
         top_retrieval = retrieval_pred["candidates"][0]
         retrieval_code = top_retrieval["code"]
         retrieval_score = top_retrieval["score"]
 
-        # --- 2. CLASSIFIER ---
+        retrieval_margin = 0.0
+        if len(retrieval_pred["candidates"]) >= 2:
+            retrieval_margin = (
+                retrieval_pred["candidates"][0]["score"] - retrieval_pred["candidates"][1]["score"]
+            )
+
         clf_code = classifier_pred.get("code")
         clf_conf = classifier_pred.get("confidence", 0.0)
-        margin = classifier_pred.get("margin", 0.0)
-        entropy = classifier_pred.get("entropy", 0.0)
+        clf_entropy = classifier_pred.get("entropy", 0.0)
 
-        # --- 3. AGREEMENT ---
+        # --- 2. Prior Weighting ---
+        if clf_code and clf_code in self.class_priors:
+            prior_weight = self.class_priors[clf_code]
+            clf_conf = clf_conf * (0.5 + 0.5 * prior_weight)
+            reasons.append(f"prior adjusted (weight={prior_weight:.2f})")
+
+        # --- 3. Domain Boosting ---
+        if original_text and clf_code and self.domain_rules:
+            text_lower = original_text.lower()
+            for abbr, allowed_codes in self.domain_rules.items():
+                if abbr in text_lower:
+                    if clf_code in allowed_codes:
+                        clf_conf = min(clf_conf * 1.2, 0.99)
+                        reasons.append(f"domain boost: {abbr} -> {clf_code}")
+                    break
+
+        # --- 4. Иерархия и согласие ---
+        if hierarchy_consistent is None:
+            hierarchy_consistent = is_same_branch(retrieval_code, clf_code, level=2)
+
         agreement = (clf_code == retrieval_code)
-        if agreement:
-            reasons.append("classifier == retrieval")
-        else:
-            reasons.append("model disagreement")
 
-        # --- 4. COMBINED SCORE ---
-        final_score = (
-            self.alpha * retrieval_score +
-            self.beta * clf_conf +
-            self.gamma * margin
-        )
+        # --- 5. Итоговая уверенность ---
+        base_confidence = retrieval_score
+        classifier_bonus = 0.0
+        if clf_conf > 0.5 and clf_entropy < 2.5:
+            if agreement:
+                classifier_bonus = 0.15
+                reasons.append("classifier agrees")
+            elif hierarchy_consistent:
+                classifier_bonus = 0.05
+                reasons.append("classifier hierarchy ok")
+            else:
+                classifier_bonus = -0.05
 
-        # --- 5. PENALTIES ---
-        if not agreement:
-            final_score *= 0.85
-        if retrieval_score < 0.4:
-            final_score *= 0.8
-            reasons.append("low retrieval similarity")
-        if clf_conf < 0.5:
-            final_score *= 0.85
-            reasons.append("low classifier confidence")
-        if margin < 0.2:
-            final_score *= 0.9
-            reasons.append("low margin")
-        if entropy > 1.5:
-            final_score *= 0.85
-            reasons.append("high entropy")
-        if not hierarchy_consistent:
-            final_score *= 0.8
-            reasons.append("hierarchy inconsistent")
+        final_confidence = min(max(base_confidence + classifier_bonus, 0.0), 1.0)
 
-        # --- 6. RISK SCORE (из risk_engine) ---
-        risk_score = 0
-        if retrieval_score < 0.75:
-            risk_score += 2
-        if margin < 0.15:
-            risk_score += 2
-        if entropy > 1.5:
-            risk_score += 1
-        if not agreement:
-            risk_score += 3
-        if not hierarchy_consistent:
-            risk_score += 3
-
-        # --- 7. ROUTING ---
-        if risk_score <= 2 and final_score >= self.auto_threshold:
+        # --- 6. Маршрутизация ---
+        if agreement and final_confidence >= self.auto_threshold:
             mode = "AUTO"
-        elif risk_score <= 5 or final_score >= self.review_threshold:
+        elif retrieval_score >= self.review_threshold:
             mode = "REVIEW"
         else:
             mode = "MANUAL"
@@ -121,7 +120,6 @@ class DecisionEngine:
         return DecisionResult(
             code=retrieval_code,
             mode=mode,
-            confidence=round(float(final_score), 4),
+            confidence=round(final_confidence, 4),
             reasons=reasons,
-            risk_score=risk_score,
         )
